@@ -45,7 +45,7 @@ is_not_exist "${TEST_ARCHIVE_DIR}/delete.tar.gz"
 
 echo "--- Error handling test case ---"
 
-echo "Test case:The required argument "TEST_TARGET_DIR" isn't given"
+echo "Test case:The required argument \"TEST_TARGET_DIR\" isn't given"
 if bash ${SCRIPT} "" 2>/dev/null; then
     echo "NG"
     exit 1
