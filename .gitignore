@@ -1,3 +1,6 @@
 test_logs/
 test_archive/
 status.log
+log/
+test/
+backup_list.conf
