@@ -42,8 +42,6 @@ for val in "${ARCHIVE_DAYS}" "${DELETE_DAYS}"; do
     fi
 done
 
-
-
 # --- Main Logic---
 
 echo "Log $(date '+%Y-%m-%d %H:%M:%S')"
@@ -55,8 +53,8 @@ find "${ARCHIVE_DIR}" -type f -mtime +"${DELETE_DAYS}" -name "*.tar.gz" -print -
 # Archive log files older than ARCHIVE_DAYS
 echo "Archive logs older than ${ARCHIVE_DAYS} days"
 find "${TARGET_DIR}" -type f -mtime +"${ARCHIVE_DAYS}" -name "*.log" | while read -r file; do
-    FILENAME=$(basename "${file}")
-    TIMESTAMP=$(date +%Y%m%d)
+    FILENAME="$(basename "${file}")"
+    TIMESTAMP="$(date +%Y%m%d)"
     
     # One archive per a file
     if tar -czf "${ARCHIVE_DIR}/${FILENAME}_${TIMESTAMP}.tar.gz" -C "$(dirname "${file}")" "${FILENAME}"; then
