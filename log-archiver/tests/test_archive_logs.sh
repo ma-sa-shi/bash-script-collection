@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-SCRIPT="./archive_logs.sh"
+SCRIPT="./scripts/archive_logs.sh"
 TEST_TARGET_DIR="./test_logs"
 TEST_ARCHIVE_DIR="./test_archive"
 
@@ -38,7 +38,7 @@ touch -d "100 days ago" "${TEST_ARCHIVE_DIR}/delete.tar.gz"
 bash ${SCRIPT} "${TEST_TARGET_DIR}" "${TEST_ARCHIVE_DIR}" 30 90
 
 is_exist "${TEST_TARGET_DIR}/keep.log"
-is_exist "${TEST_ARCHIVE_DIR}/archive.log_$(date +%Y%m%d).tar.gz"
+is_exist "${TEST_ARCHIVE_DIR}/archive_$(date +%Y%m%d).tar.gz"
 is_not_exist "${TEST_TARGET_DIR}/archive.log"
 is_exist "${TEST_ARCHIVE_DIR}/keep.tar.gz"
 is_not_exist "${TEST_ARCHIVE_DIR}/delete.tar.gz"

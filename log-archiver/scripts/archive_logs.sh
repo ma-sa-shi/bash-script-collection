@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Delete archive files older than DELETE_DAYS
-# Archive log files older than ARCHIVE_DAYS
+# 目的: ストレージ容量を節約するため、
+# 指定した日数を経過したログファイルのアーカイブと削除を自動化する
+# アーカイブ先はデフォルトでカレントディレクトリ内の./archive
 
 set -euo pipefail
 
@@ -12,13 +13,13 @@ DELETE_DAYS="${4:-90}"
 
 # --- Validation ---
 
-# Check required the argument
+# 引数不足時は実行例を表示して中断
 if [[ -z "${TARGET_DIR}" ]]; then
     echo "Usage: $0 <target_dir> [archive_dir] [archive_days] [delete_days]" >&2
     exit 1
 fi
 
-# Check directory existence
+
 if [[ ! -d "${TARGET_DIR}" ]]; then
     echo "Error: Directory ${TARGET_DIR} does not exist." >&2
     exit 1
@@ -26,7 +27,7 @@ fi
 
 mkdir -p "${ARCHIVE_DIR}" 
 
-# Check write permission for required dir
+# 書き込み権限がないとtarやrmで失敗するため、事前に検証
 for dir in "${TARGET_DIR}" "${ARCHIVE_DIR}"; do
     if [[ ! -w "${dir}" ]]; then
         echo "Error: No write permission for ${dir}." >&2
@@ -34,7 +35,6 @@ for dir in "${TARGET_DIR}" "${ARCHIVE_DIR}"; do
     fi
 done
 
-# Validate the numeric arguments
 for val in "${ARCHIVE_DAYS}" "${DELETE_DAYS}"; do
     if [[ ! "${val}" =~ ^[0-9]+$ ]]; then
         echo "Error: ${val} is not a valid number." >&2
@@ -46,18 +46,22 @@ done
 
 echo "Log $(date '+%Y-%m-%d %H:%M:%S')"
 
-# Delete archive files older than DELETE_DAYS
+# DELETE_DAYSを経過したアーカイブを削除
 echo "Delete archives older than ${DELETE_DAYS} days"
 find "${ARCHIVE_DIR}" -type f -mtime +"${DELETE_DAYS}" -name "*.tar.gz" -print -delete
 
-# Archive log files older than ARCHIVE_DAYS
+# 1ファイルずつログを圧縮してアーカイブ化
 echo "Archive logs older than ${ARCHIVE_DAYS} days"
-find "${TARGET_DIR}" -type f -mtime +"${ARCHIVE_DAYS}" -name "*.log" | while read -r file; do
+find "${TARGET_DIR}" -type f -mtime +"${ARCHIVE_DAYS}" -name "*.log" -print0 | while IFS= read -r -d '' file; do
     FILENAME="$(basename "${file}")"
+    FILENAME_BASE="${FILENAME%.*}"
     TIMESTAMP="$(date +%Y%m%d)"
-    
-    # One archive per a file
-    if tar -czf "${ARCHIVE_DIR}/${FILENAME}_${TIMESTAMP}.tar.gz" -C "$(dirname "${file}")" "${FILENAME}"; then
+
+    DEST_FILE="${ARCHIVE_DIR}/${FILENAME_BASE}_${TIMESTAMP}.tar.gz"
+
+    # 圧縮に成功した場合のみ、ログファイルを削除
+    # アーカイブ内に余計なディレクトリ階層を含めないよう、ディレクトリを移動して実行
+    if tar -czf "${DEST_FILE}" -C "$(dirname "${file}")" "${FILENAME}"; then
         rm "${file}"
         echo "${file}"
     fi
