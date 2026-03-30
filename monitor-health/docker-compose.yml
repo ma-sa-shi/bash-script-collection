@@ -1,0 +1,15 @@
+services:
+  ubuntu-test:
+    build:
+      context: .
+      dockerfile: tests/ubuntu/ubuntu.Dockerfile
+
+  rockylinux-test:
+    build:
+      context: .
+      dockerfile: tests/rockylinux/rockylinux.Dockerfile
+
+  alpine-test:
+    build:
+      context: .
+      dockerfile: tests/alpine/alpine.Dockerfile
